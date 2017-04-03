@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-  
+#Time : 17-4-3
+#Author: zouhl
+
+
+import urllib2
+import os
+import re
+from bs4 import BeautifulSoup
+
+imgPath = 'E:\\test'
+root_url = 'http://www.mzitu.com/all'
+
+
+def get_soup(url):
+    request = urllib2.Request(url)
+    request.add_header('user-agent', 'Mozilla/5.0')
+    response = urllib2.urlopen(url)
+    html = response.read()
+    soup = BeautifulSoup(html, 'lxml')
+    return soup
+
+def get_url(page):
+    page_soup = page
+    url = page_soup.find('div',class_='main-image').find('a').find('img')
+    return url
+
+#find得到的还是html结构，可以继续find，find_all得到的是list
+page1 = get_soup(root_url)
+img_urls = page1.find('div',class_='main-content').find_all('a',href=re.compile(r"http://.*\.com/\d+"),alt='')
+
+url_qc =[]
+url_name = []
+# print img_urls
+for img_url in img_urls:
+    #chinese list luanma
+    # url_name.append(img_url.get_text())
+    url_qc.append(img_url['href'])
+# print url_name
+#对得到的url使用set对列表去重，并保持列表原来顺序
+url_list = list(set(url_qc))
+url_list.sort(key=url_qc.index)
+# print url_list
+
+for url_a in url_list:
+    for i in range(1,10):
+        url = url_a +"/"+str(i)
+        print url
+        page2 = get_soup(url)
+    # # img_url2 = page2.find('div',class_='main-image').find('a').find('img')
+        name = get_url(page2)['alt']+str(i)
+        url2 = get_url(page2)['src']
+        # print name,url2
+        img_content = urllib2.urlopen(url2)
+        filename=os.path.join(imgPath,name+'.jpg')
+
+        try:
+            with open(filename,'wb') as f:
+                f.write(img_content.read())
+                print('下载完成\n')
+        except IOError,(errno,strerror):
+            print "I/O error(%s):%s" %(errno,strerror)
+            print filename
+            continue
