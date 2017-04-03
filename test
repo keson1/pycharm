@@ -1,0 +1,33 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-  
+#Time : 17-4-3
+#Author: zouhl
+
+import urllib2
+import os
+import re
+from bs4 import BeautifulSoup
+
+imgPath = 'E:\\test'
+url = 'http://www.mzitu.com/all'
+
+request = urllib2.Request(url)
+request.add_header('user-agent', 'Mozilla/5.0')
+response = urllib2.urlopen(url)
+html = response.read()
+soup = BeautifulSoup(html, 'lxml')
+
+
+img_url = soup.find_all('img')
+# .find('img')['data-original']
+index = 1
+for i in img_url:
+    if i.get('data-original'):
+        a = i.get('data-original')
+        img_content = urllib2.urlopen(a)
+        # with open(img_dir.format(i,'jpg'),'wb') as f:
+        filename=os.path.join(imgPath,str(index)+'.jpg')
+        with open(filename,'wb') as f:
+            f.write(img_content.read())
+            print('下载完成\n')
+            index+=1
