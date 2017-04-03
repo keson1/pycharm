@@ -8,9 +8,10 @@ import urllib2
 import os
 import re
 from bs4 import BeautifulSoup
+import time
 
 imgPath = 'E:\\test'
-root_url = 'http://www.mzitu.com/all'
+root_url = 'http://www.mzitu.com/page/3'
 
 
 def get_soup(url):
@@ -25,6 +26,8 @@ def get_url(page):
     page_soup = page
     url = page_soup.find('div',class_='main-image').find('a').find('img')
     return url
+
+start_time = time.time()
 
 #find得到的还是html结构，可以继续find，find_all得到的是list
 page1 = get_soup(root_url)
@@ -43,8 +46,10 @@ url_list = list(set(url_qc))
 url_list.sort(key=url_qc.index)
 # print url_list
 
+#jishu
+count = 0
 for url_a in url_list:
-    for i in range(1,10):
+    for i in range(1,15):
         url = url_a +"/"+str(i)
         print url
         page2 = get_soup(url)
@@ -59,7 +64,11 @@ for url_a in url_list:
             with open(filename,'wb') as f:
                 f.write(img_content.read())
                 print('下载完成\n')
+                count += 1
         except IOError,(errno,strerror):
             print "I/O error(%s):%s" %(errno,strerror)
             print filename
             continue
+
+end_time = time.time()
+print "共下载 %s 张图片，共花费 %.5s 秒" % (count,end_time - start_time)
